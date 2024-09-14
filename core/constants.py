@@ -102,3 +102,4 @@ for label in labels:
         category2labels[category].append(label)
     else:
         category2labels[category] = [label]
+print(category2labels)
