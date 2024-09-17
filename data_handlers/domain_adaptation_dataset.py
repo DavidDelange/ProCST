@@ -1,9 +1,11 @@
 import numpy as np
-from core.constants import IGNORE_LABEL, IMG_CROP_SIZE_SEMSEG
-from core.functions import GeneratePyramid
+from core.constants import IGNORE_LABEL, IMG_CROP_SIZE_SEMSEG, PALETTE
+from core.functions import GeneratePyramid, rgb_image_to_palette_indices
 import os.path as osp
 from torch.utils import data
 from torchvision import transforms
+from torchvision.transforms import Compose, ToTensor, Resize, RandomRotation, RandomHorizontalFlip, RandomVerticalFlip
+from core.transforms_torch import CustomGaussianBlur,RandomCropInsideBoundingBox, BinarizeTargets, CustomRandomContrast
 
 class domainAdaptationDataSet(data.Dataset):
     def __init__(self, root, images_list_path, scale_factor, num_scales, curr_scale, set, get_image_label=False):
@@ -30,6 +32,7 @@ class domainAdaptationDataSet(data.Dataset):
 
     def convert_to_class_ids(self, label_image):
         label = np.asarray(label_image, np.float32)
+        label = rgb_image_to_palette_indices(label, PALETTE)
         label_copy = self.ignore_label * np.ones(label.shape, dtype=np.float32)
         for k, v in self.id_to_trainid.items():
             label_copy[label == k] = v

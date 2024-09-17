@@ -6,6 +6,24 @@ from PIL import Image
 import os
 from core.constants import palette, NUM_CLASSES, IGNORE_LABEL
 
+def rgb_image_to_palette_indices(rgb_image, color_to_index):
+    """
+    Convierte una imagen RGB a una imagen de índices de paleta.
+
+    Parámetros:
+    - rgb_image: Array de NumPy de la imagen RGB con forma (altura, anchura, 3).
+    - color_to_index: Diccionario de mapeo de colores RGB a índices de paleta.
+
+    Retorna:
+    - Array de NumPy con forma (altura, anchura) con los índices de la paleta.
+    """
+    indexed_image = np.zeros((rgb_image.shape[0], rgb_image.shape[1]), dtype=np.uint8)
+    for i in range(rgb_image.shape[0]):
+        for j in range(rgb_image.shape[1]):
+            pixel = tuple(rgb_image[i, j])
+            indexed_image[i, j] = color_to_index[pixel]
+    return indexed_image
+
 def denorm(x):
     out = (x + 1) / 2
     return out.clamp(0, 1)

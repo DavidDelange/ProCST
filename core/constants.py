@@ -9,11 +9,16 @@ for i in range(zero_pad):
     palette.append(0)
 
 IMG_CROP_SIZE_SEMSEG = (1024, 512)
-RESIZE_SHAPE = {'gta5': (1126, 619), 'synthia':(1113, 661), 'cityscapes':(1024,512)}
+RESIZE_SHAPE = {'gta5': (1126, 619), 'synthia':(1113, 661), 'cityscapes':(1024,512), 'real':(512,512), 'synth':(512,512)}
 DATASETS_IMG_SIZE = {'gta5': (1914, 1052), 'synthia':(1280, 760), 'cityscapes':(2048,1024)}
 BEST_MIOU = 0.
 
-
+PALETTE = {
+    (0, 0, 0): 0,
+    (255, 0, 0): 1,
+    (0, 255, 0): 2,
+    (0, 0, 255): 3
+}
 
 
 # Cityscapes labels
@@ -74,7 +79,7 @@ Label = namedtuple( 'Label' , [
 
 labels = [
     #       name                     id    trainId   category            catId     hasInstances   ignoreInEval   color
-    Label(  'unlabeled'            ,  0 ,      0 , 'void'               , 0       , False        , True         , (  0,  0,  0) ),
+    Label(  'unlabeled'            ,  0 ,      255 , 'void'             , 0       , False        , True         , (  0,  0,  0) ),
     Label(  'manhole'              ,  1 ,      1 , 'utility'            , 1       , False        , False        , (  255,  0,  0) ),
     Label(  'trench'               ,  2 ,      2 , 'utility'            , 1       , False        , False        , (  0,  255,  0) ),
     Label(  'pipe'                 ,  3 ,      3 , 'utility'            , 1       , False        , False        , (  0,  0,  255) ),
