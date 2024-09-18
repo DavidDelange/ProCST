@@ -192,7 +192,7 @@ class RealDataSet(domainAdaptationDataSet):
 
 if __name__ == '__main__':
     root = '/home/ddel/workspace/data/seescans/real'
-    images_list_path = '/home/ddel/workspace/repositories/ProCST/dataset/real'
+    images_list_path = '/home/ddel/workspace/repositories/ProCST/dataset/real_list'
     scale_factor = 0.5
     num_scales = 2
     curr_scale = 0

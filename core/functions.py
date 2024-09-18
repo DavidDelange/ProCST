@@ -159,6 +159,8 @@ def ImageToNumpy(im):
     im = np.asarray(im, np.float32)
     if len(im.shape) == 3:
         im = np.transpose(im, (2, 0, 1))
+    elif len(im.shape) == 2:
+        im = np.expand_dims(im, axis=0)
     return im
 
 class runningScore(object):

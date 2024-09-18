@@ -107,7 +107,7 @@ def train_single_scale(netDst, netGst, netDts, netGts, Gst: list, Gts: list, Dst
             semseg_pretrained_source = nn.DataParallel(torch.load(opt.pretrained_deeplabv2_on_synth)) if (len(opt.gpus) > 1) else torch.load(opt.pretrained_deeplabv2_on_synth)
         else:
             raise NotImplemented()
-        semseg_pretrained_source.eval()
+        semseg_pretrained_source.eval()  ## TODO: revisar e incluir dentro del bloque del if
     else:
         optimizer_semseg_cs, optimizer_semseg_gen, semseg_pretrained_source = None, None, None
 

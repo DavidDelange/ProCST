@@ -25,12 +25,12 @@ def get_arguments():
     # Dataset parameters:
     parser.add_argument("--source", type=str, default='synth', help='Source dataset. synth')
     parser.add_argument("--target", type=str, default='real', help='target dataset. real')
-    parser.add_argument("--src_data_dir", type=str, default='data/synth', help='Path to the directory containing the source dataset.')
-    parser.add_argument("--trg_data_dir", type=str, default='data/real', help='Path to the directory containing the target dataset.')
+    parser.add_argument("--src_data_dir", type=str, default='/home/ddel/workspace/data/seescans/synth', help='Path to the directory containing the source dataset.')
+    parser.add_argument("--trg_data_dir", type=str, default='/home/ddel/workspace/data/seescans/real', help='Path to the directory containing the target dataset.')
     parser.add_argument("--num_workers", type=int, default=4, help="Number of threads for each worker")
 
     # generator parameters:
-    parser.add_argument('--batch_size', type=int, default=1)
+    parser.add_argument('--batch_size', type=int, default=2)
     parser.add_argument('--batch_size_list', type=int, nargs='+', help="batch size in each one of the scales", default=[0])
     parser.add_argument('--warmup_epochs', type=int, default=0, help='Number of warmup epochs before switching to label conditioned generator.')
     parser.add_argument('--ker_size', type=int, help='kernel size', default=3)

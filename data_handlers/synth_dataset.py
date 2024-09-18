@@ -190,7 +190,7 @@ class SynthDataSet(domainAdaptationDataSet):
 
 if __name__ == '__main__':
     root = '/home/ddel/workspace/data/seescans/synth'
-    images_list_path = '/home/ddel/workspace/repositories/ProCST/dataset/synth'
+    images_list_path = '/home/ddel/workspace/repositories/ProCST/dataset/synth_list'
     scale_factor = 0.5
     num_scales = 2
     curr_scale = 0
