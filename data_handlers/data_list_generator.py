@@ -17,5 +17,24 @@ def generate_data_list(root_path, dataset, set_name):
     print(f"Data list for subset '{set_name}' generated successfully.")
 
 
-generate_data_list('/home/ddel/workspace/data/seescans', 'real', "train")
-generate_data_list('/home/ddel/workspace/data/seescans', 'synth', "train")
+#Crea una funcion que lea el archivo .txt dada una ruta y cree a partir de ella dos nuevas: una con el 80% de los datos y otra con el 20% restante que se llame train_semseg_net.txt y val_semseg_net.txt respectivamente
+def split_data_file(path, set_name):
+    # Leer el archivo original
+    with open(f"{path}/{set_name}", 'r') as file:
+        lines = file.readlines()
+    
+    # Calcular el punto de corte para el 80% de los datos
+    split_point = int(len(lines) * 0.8)
+    
+    # Escribir el 80% de los datos en train_semseg_net.txt
+    with open(f"{path}/train_semseg_net.txt", 'w') as train_file:
+        train_file.writelines(lines[:split_point])
+    
+    # Escribir el 20% restante en val_semseg_net.txt
+    with open(f"{path}/val_semseg_net.txt", 'w') as val_file:
+        val_file.writelines(lines[split_point:])
+
+if __name__ == "__main__":
+    # generate_data_list('/home/ddel/workspace/data/seescans', 'real', "train")
+    # generate_data_list('/home/ddel/workspace/data/seescans', 'synth', "train")
+    split_data_file('/home/ddel/workspace/repositories/ProCST/dataset/synth', 'train.txt')

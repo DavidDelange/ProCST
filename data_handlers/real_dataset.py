@@ -1,13 +1,23 @@
-from data_handlers.domain_adaptation_dataset import domainAdaptation
+import os.path as osp
+from data_handlers.domain_adaptation_dataset import domainAdaptationDataSet
+from PIL import Image
+import numpy as np
+from core.constants import RESIZE_SHAPE
+import os
+import yaml
+import torchvision.transforms.functional as F
+from torchvision.transforms import Compose, ToTensor, Resize, RandomRotation, RandomHorizontalFlip, RandomVerticalFlip
+from core.transforms_torch import CustomGaussianBlur,RandomCropInsideBoundingBox, BinarizeTargets, CustomRandomContrast
+from torchvision.transforms import InterpolationMode
 
 class RealDataSet(domainAdaptationDataSet):
-    def __init__(self, root, images_list_path, scale_factor, num_scales, curr_scale, set, get_image_label=False, get_image_label_pyramid=False, get_filename=False, get_original_image=False):
-        super(GTA5DataSet, self).__init__(root, images_list_path, scale_factor, num_scales, curr_scale, set, get_image_label=get_image_label)
+    def __init__(self, root, images_list_path, scale_factor, num_scales, curr_scale, set, get_image_label=False, get_scales_pyramid=False, get_original_image=False):
+        super(RealDataSet, self).__init__(root, images_list_path, scale_factor, num_scales, curr_scale, set, get_image_label=get_image_label)
         self.domain_resize = RESIZE_SHAPE['real']
-        self.get_image_label_pyramid = get_image_label_pyramid
-        self.get_filename = get_filename
-        self.get_original_image = get_original_image
+        self.get_scales_pyramid= get_scales_pyramid
         self.id_to_trainid = {1: 1, 2: 2, 3: 3}
+        self.num_labels = len(self.id_to_trainid.keys())
+        self.get_original_image = get_original_image
         if images_list_path != None:
             self.images_list_file = osp.join(images_list_path, '%s.txt' % set)
             self.img_ids = [image_id.strip().split('.')[0] for image_id in open(self.images_list_file)]
@@ -16,7 +26,7 @@ class RealDataSet(domainAdaptationDataSet):
         return len(self.img_ids)
 
     def __getitem__(self, index):
-        image, label = self.__getitem_seescans__(index)
+        image, label = self.getitem_seescans(index)
 
         scales_pyramid, label, label_copy = None, None, None
         if self.get_image_label:
@@ -59,7 +69,8 @@ class RealDataSet(domainAdaptationDataSet):
             Binary mask tensor of $[H, W]$
         """
         # Get sample and target by index
-        sample, sample_length = self.get_sample(index)     
+        sample, sample_length = self.get_sample(index)
+        self.sample_shape = sample.shape
         target = self.get_target(index)
         sample_channels = sample.shape[-1]
 
@@ -78,8 +89,8 @@ class RealDataSet(domainAdaptationDataSet):
                 # RandomRotation(degrees=10, expand=False),
                 RandomHorizontalFlip(p=0.5),
                 RandomVerticalFlip(p=0.5),
-                RandomCropInsideBoundingBox(image_dist_meters=sample_length, target_crop_meters=10, min_percentage=0.3, p=1, stage=stage, verbose=False),
-                Resize(size=(512, 512)),
+                RandomCropInsideBoundingBox(image_dist_meters=sample_length, target_crop_meters=10, min_percentage=0.3, p=1, stage='train', verbose=False),
+                Resize(size=(512, 512), interpolation=InterpolationMode.NEAREST),
                 # CustomGaussianBlur(kernel_size_range=[5, 9], sigma_range=[0.5, 2], p=0.3, num_labels=3),
             ])            
             transformed_composition = transforms_pipeline(composition)
@@ -89,8 +100,8 @@ class RealDataSet(domainAdaptationDataSet):
             sample = transformed_composition[:sample_channels]
             target = transformed_composition[sample_channels:]
 
-            sample = Image.fromarray(sample)
-            target = Image.fromarray(target)
+            sample = F.to_pil_image(sample.cpu())
+            target = F.to_pil_image(target.cpu())
         return sample, target
             
 
@@ -116,9 +127,8 @@ class RealDataSet(domainAdaptationDataSet):
         # Load sample and convert to np.darray
         # TODO: check if .convert RGB to the PIL image is required
         # TODO: check if returning PIL image only (not numpy) works
-        sample = [np.expand_dims(self._read_image_as_numpy(sample_path)[:,:,0], axis=-1)]
+        sample = np.expand_dims(self._read_image_as_numpy(sample_path)[:,:,0], axis=-1)
 
-        # print(sample.shape)
         return sample, sample_length
 
     def get_target(self, index):
@@ -161,7 +171,7 @@ class RealDataSet(domainAdaptationDataSet):
 
     def get_sample_length(self, index):
         name = self.img_ids[index] + '.yml'
-        image = osp.join(self.root, "%s/yaml/%s" % (self.set, name))
+        yaml_path = osp.join(self.root, "%s/yaml/%s" % (self.set, name))
         sample_length = 0
         if os.path.exists(yaml_path):
             with open(yaml_path, 'rb') as f:
@@ -183,14 +193,14 @@ class RealDataSet(domainAdaptationDataSet):
 if __name__ == '__main__':
     root = '/home/ddel/workspace/data/seescans/real'
     images_list_path = '/home/ddel/workspace/repositories/ProCST/dataset/real'
-    scale_factor = 2
-    num_scales = 3
+    scale_factor = 0.5
+    num_scales = 2
     curr_scale = 0
     set = 'train'
-    get_image_label = True
-    get_image_label_pyramid = True
-    get_filename = True
+    get_scales_pyramid=False,
+    get_image_label = False
     get_original_image = False
-    real_dataset = RealDataSet(root, images_list_path, scale_factor, num_scales, curr_scale, set, get_image_label, get_image_label_pyramid, get_filename, get_original_image)
+    real_dataset = RealDataSet(root, images_list_path, scale_factor, num_scales, curr_scale, set, get_image_label, get_scales_pyramid, get_original_image)
     print(real_dataset[0])
     print(len(real_dataset))
+    

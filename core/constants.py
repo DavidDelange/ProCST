@@ -8,9 +8,9 @@ zero_pad = 256 * 3 - len(palette)
 for i in range(zero_pad):
     palette.append(0)
 
-IMG_CROP_SIZE_SEMSEG = (1024, 512)
-RESIZE_SHAPE = {'gta5': (1126, 619), 'synthia':(1113, 661), 'cityscapes':(1024,512), 'real':(512,512), 'synth':(512,512)}
-DATASETS_IMG_SIZE = {'gta5': (1914, 1052), 'synthia':(1280, 760), 'cityscapes':(2048,1024)}
+IMG_CROP_SIZE_SEMSEG = (512, 512)
+RESIZE_SHAPE = {'real':(512,512), 'synth':(512,512)}
+DATASETS_IMG_SIZE = {'real':(13519,6202), 'synth':(2048,2048)}
 BEST_MIOU = 0.
 
 PALETTE = {

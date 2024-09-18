@@ -45,7 +45,7 @@ def CreateSemsegModel(args):
     return model, optimizer
 
 def CreateSemsegPyramidModel(args, dataset_name=None):
-    if args.semseg_model_path != '' and not(dataset_name!='GTA' and args.load_only_gta_weights):
+    if args.semseg_model_path != '' and not(dataset_name!='synth' and args.load_only_synth_weights):
         feature_extractor = torch.load(os.path.join(args.semseg_model_path,
                                                     '%s_%s_on_%s_Epoch%d.pth'
                                                     % (args.model,

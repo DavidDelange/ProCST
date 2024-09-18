@@ -15,8 +15,8 @@ import torch
 import numpy as np
 import random
 from torchvision.transforms import RandomAffine, InterpolationMode, ToTensor, Resize, RandomEqualize, RandomAutocontrast, GaussianBlur
-import matplotlib.patches as patches
-import matplotlib.pyplot as plt
+# import matplotlib.patches as patches
+# import matplotlib.pyplot as plt
 import os
 import glob
 import torch.nn.functional as F
@@ -191,16 +191,16 @@ class CustomRandomContrast(torch.nn.Module):
                 sample_contrast = sample.clone()
                 mean = sample_contrast.mean()
             
-            if self.verbose:
-                sample_plot_min = sample.clone()                  
-                sample_plot_min[indices[:, 0], indices[:, 1], indices[:, 2]] = (sample_plot_min[indices[:, 0], indices[:, 1], indices[:, 2]] - mean) * self.alpha_range[0] + mean
-                sample_plot_min[indices[:, 0], indices[:, 1], indices[:, 2]] = torch.clamp(sample_plot_min[indices[:, 0], indices[:, 1], indices[:, 2]], 0, 1)
+            # if self.verbose:
+            #     sample_plot_min = sample.clone()                  
+            #     sample_plot_min[indices[:, 0], indices[:, 1], indices[:, 2]] = (sample_plot_min[indices[:, 0], indices[:, 1], indices[:, 2]] - mean) * self.alpha_range[0] + mean
+            #     sample_plot_min[indices[:, 0], indices[:, 1], indices[:, 2]] = torch.clamp(sample_plot_min[indices[:, 0], indices[:, 1], indices[:, 2]], 0, 1)
             
-                sample_plot_max = sample.clone()                  
-                sample_plot_max[indices[:, 0], indices[:, 1], indices[:, 2]] = (sample_plot_max[indices[:, 0], indices[:, 1], indices[:, 2]] - mean) * self.alpha_range[1] + mean
-                sample_plot_max[indices[:, 0], indices[:, 1], indices[:, 2]] = torch.clamp(sample_plot_max[indices[:, 0], indices[:, 1], indices[:, 2]], 0, 1)
+            #     sample_plot_max = sample.clone()                  
+            #     sample_plot_max[indices[:, 0], indices[:, 1], indices[:, 2]] = (sample_plot_max[indices[:, 0], indices[:, 1], indices[:, 2]] - mean) * self.alpha_range[1] + mean
+            #     sample_plot_max[indices[:, 0], indices[:, 1], indices[:, 2]] = torch.clamp(sample_plot_max[indices[:, 0], indices[:, 1], indices[:, 2]], 0, 1)
                 
-                visualize_contrast(sample, sample_plot_min, sample_plot_max)
+            #     visualize_contrast(sample, sample_plot_min, sample_plot_max)
 
             return torch.cat((sample_contrast, targets), dim=0) 
         return image
@@ -234,19 +234,19 @@ class RandomLevelsPreset(torch.nn.Module):
             
             sample_levels = torch.clamp((sample - levels_min) / (levels_max - levels_min), 0, 1)
 
-            if self.verbose:
-                sample_plot_min = sample.clone()    
-                sample_plot_min = torch.clamp((sample - self.levels_min_range[0]) / (self.levels_max_range[-1] - self.levels_min_range[0]), 0, 1)
+            # if self.verbose:
+            #     sample_plot_min = sample.clone()    
+            #     sample_plot_min = torch.clamp((sample - self.levels_min_range[0]) / (self.levels_max_range[-1] - self.levels_min_range[0]), 0, 1)
 
-                sample_plot_max = sample.clone()   
-                sample_plot_max = torch.clamp((sample - self.levels_min_range[-1]) / (self.levels_max_range[0] - self.levels_min_range[-1]), 0, 1)
+            #     sample_plot_max = sample.clone()   
+            #     sample_plot_max = torch.clamp((sample - self.levels_min_range[-1]) / (self.levels_max_range[0] - self.levels_min_range[-1]), 0, 1)
 
-                visualize_levels(sample, sample_plot_min, sample_plot_max)
+            #     visualize_levels(sample, sample_plot_min, sample_plot_max)
 
             return torch.cat((sample_levels, targets), dim=0) 
         return image
     
-class BipolarPreset(torch.nn.Module):
+# class BipolarPreset(torch.nn.Module):
     """
     Args:
         levels_range (list)
@@ -507,10 +507,10 @@ class RandomCropInsideBoundingBox(torch.nn.Module):
                         cropped_rect_so_far = cropped_rect      
                     iterations += 1
 
-            if self.verbose:
-                print(f'\tExit after {iterations} iterations with a valid values ratio of {round(max_percentage_so_far, 2)}')
-                print(f'\tCrop X: {crop_left}\tCrop Y: {crop_bottom}')
-                visualize_boundingbox(image, rect, cropped_image_so_far, cropped_rect_so_far, self.sample_dim)
+            # if self.verbose:
+            #     print(f'\tExit after {iterations} iterations with a valid values ratio of {round(max_percentage_so_far, 2)}')
+            #     print(f'\tCrop X: {crop_left}\tCrop Y: {crop_bottom}')
+            #     visualize_boundingbox(image, rect, cropped_image_so_far, cropped_rect_so_far, self.sample_dim)
         else:
             cropped_image_so_far = image 
         
@@ -555,268 +555,268 @@ class SequentialCropInsideBoundingBox(torch.nn.Module):
 
             stacked_images = torch.stack(cropped_images, dim=1)
            
-            if self.verbose:
-                visualize_sequential_crop(stacked_images, self.sample_dim)
+            # if self.verbose:
+            #     visualize_sequential_crop(stacked_images, self.sample_dim)
         else:
             return image
         
         return stacked_images
     
-class OverlapCropInsideBoundingBox(torch.nn.Module):
-    def __init__(self, 
-                 image_dist_meters=25, 
-                 target_crop_meters=10,
-                 multiplier=.5,
-                 data_threshold=35,
-                 sample_dim=1,  
-                 p=1,
-                 stage='test',
-                 remapping_mode=False,
-                 verbose=False):
+# class OverlapCropInsideBoundingBox(torch.nn.Module):
+#     def __init__(self, 
+#                  image_dist_meters=25, 
+#                  target_crop_meters=10,
+#                  multiplier=.5,
+#                  data_threshold=35,
+#                  sample_dim=1,  
+#                  p=1,
+#                  stage='test',
+#                  remapping_mode=False,
+#                  verbose=False):
         
-        super().__init__()        
-        self.image_dist_meters = image_dist_meters
-        self.target_crop_meters = target_crop_meters
-        self.multiplier = multiplier
-        self.data_threshold = data_threshold
-        self.sample_dim = sample_dim 
-        self.p = p
-        self.stage=stage
-        self.remapping_mode=remapping_mode
-        self.verbose = verbose
+#         super().__init__()        
+#         self.image_dist_meters = image_dist_meters
+#         self.target_crop_meters = target_crop_meters
+#         self.multiplier = multiplier
+#         self.data_threshold = data_threshold
+#         self.sample_dim = sample_dim 
+#         self.p = p
+#         self.stage=stage
+#         self.remapping_mode=remapping_mode
+#         self.verbose = verbose
 
     
-    def forward(self, image):
+#     def forward(self, image):
 
-        image_res = np.max(image.shape)                      
-        target_crop = int(image_res/self.image_dist_meters*self.target_crop_meters)
-        grid_size = int(target_crop * self.multiplier)
+#         image_res = np.max(image.shape)                      
+#         target_crop = int(image_res/self.image_dist_meters*self.target_crop_meters)
+#         grid_size = int(target_crop * self.multiplier)
          
-        # Pad input tensor
-        image = F.pad(image, (target_crop // 2, target_crop // 2, target_crop // 2, target_crop // 2), value=0)
+#         # Pad input tensor
+#         image = F.pad(image, (target_crop // 2, target_crop // 2, target_crop // 2, target_crop // 2), value=0)
 
-        # Get the dimensions of the input tensor
-        height, width = image.shape[-2], image.shape[-1]
+#         # Get the dimensions of the input tensor
+#         height, width = image.shape[-2], image.shape[-1]
 
-        # Calculate the number of squares in each dimension
-        num_squares_h = (height + grid_size - 1) // grid_size
-        num_squares_w = (width + grid_size - 1) // grid_size
+#         # Calculate the number of squares in each dimension
+#         num_squares_h = (height + grid_size - 1) // grid_size
+#         num_squares_w = (width + grid_size - 1) // grid_size
 
-        # Initialize an empty list to store the cropped squares
-        double_cropped_squares = []
-        boundaries = []
-        double_boundaries = []
-        # Loop through each square
-        for i in range(num_squares_h):
-            for j in range(num_squares_w):
-                # Calculate the starting indices for the current square
-                start_h = i * grid_size
-                start_w = j * grid_size
+#         # Initialize an empty list to store the cropped squares
+#         double_cropped_squares = []
+#         boundaries = []
+#         double_boundaries = []
+#         # Loop through each square
+#         for i in range(num_squares_h):
+#             for j in range(num_squares_w):
+#                 # Calculate the starting indices for the current square
+#                 start_h = i * grid_size
+#                 start_w = j * grid_size
 
-                # Crop the square from the padded tensor
-                cropped_square = image[..., start_h:start_h+grid_size, start_w:start_w+grid_size]
+#                 # Crop the square from the padded tensor
+#                 cropped_square = image[..., start_h:start_h+grid_size, start_w:start_w+grid_size]
 
-                # Check if the cropped square contains non-zero values
-                if cropped_square.nonzero().numel() > 0:
-                    # Save boundaries
-                    boundaries.append((start_h, start_w, grid_size))
+#                 # Check if the cropped square contains non-zero values
+#                 if cropped_square.nonzero().numel() > 0:
+#                     # Save boundaries
+#                     boundaries.append((start_h, start_w, grid_size))
 
-                    # Center indices for the new double-sized crops
-                    center_h = start_h + grid_size // 2
-                    center_w = start_w + grid_size // 2
+#                     # Center indices for the new double-sized crops
+#                     center_h = start_h + grid_size // 2
+#                     center_w = start_w + grid_size // 2
 
-                    # Adjust starting indices for double-sized crops
-                    start_h_double = center_h - target_crop // 2
-                    start_w_double = center_w - target_crop // 2
+#                     # Adjust starting indices for double-sized crops
+#                     start_h_double = center_h - target_crop // 2
+#                     start_w_double = center_w - target_crop // 2
 
-                    # Crop the double-sized square from the padded tensor
-                    double_cropped_square = image[..., start_h_double:start_h_double+target_crop,
-                                                    start_w_double:start_w_double+target_crop]
+#                     # Crop the double-sized square from the padded tensor
+#                     double_cropped_square = image[..., start_h_double:start_h_double+target_crop,
+#                                                     start_w_double:start_w_double+target_crop]
 
                     
-                    if double_cropped_square.shape[-1] == target_crop and double_cropped_square.shape[-2] == target_crop:
-                        # Count the number of non-zero elements in the crop
-                        num_non_zero = torch.count_nonzero(double_cropped_square[0,:,:])
+#                     if double_cropped_square.shape[-1] == target_crop and double_cropped_square.shape[-2] == target_crop:
+#                         # Count the number of non-zero elements in the crop
+#                         num_non_zero = torch.count_nonzero(double_cropped_square[0,:,:])
 
-                        # Calculate the total number of elements in the crop
-                        total_elements = double_cropped_square[0,:,:].numel()
+#                         # Calculate the total number of elements in the crop
+#                         total_elements = double_cropped_square[0,:,:].numel()
 
-                        # Calculate the percentage of data inside the crop
-                        percentage = (num_non_zero / total_elements) * 100
-                        if percentage > self.data_threshold:                           
-                            # Append the double-sized cropped square to the list
-                            double_cropped_squares.append(double_cropped_square)
+#                         # Calculate the percentage of data inside the crop
+#                         percentage = (num_non_zero / total_elements) * 100
+#                         if percentage > self.data_threshold:                           
+#                             # Append the double-sized cropped square to the list
+#                             double_cropped_squares.append(double_cropped_square)
 
-                            # Save boundaries for the double-sized crop
-                            double_boundaries.append((start_h_double, start_w_double, target_crop))
+#                             # Save boundaries for the double-sized crop
+#                             double_boundaries.append((start_h_double, start_w_double, target_crop))
 
-        # Stack the cropped squares along a new dimension to form the final tensor
-        if self.remapping_mode:
-            return double_boundaries, [height, width]
+#         # Stack the cropped squares along a new dimension to form the final tensor
+#         if self.remapping_mode:
+#             return double_boundaries, [height, width]
         
-        return torch.stack(double_cropped_squares, dim=1)
+#         return torch.stack(double_cropped_squares, dim=1)
 
             
-def visualize_sequential_crop(image, sample_dim):
-    # Saving
-    save_path = './test_torchvision_transf'
-    os.makedirs(save_path, exist_ok=True)
-    files = glob.glob(save_path + '/*.png')
+# def visualize_sequential_crop(image, sample_dim):
+#     # Saving
+#     save_path = './test_torchvision_transf'
+#     os.makedirs(save_path, exist_ok=True)
+#     files = glob.glob(save_path + '/*.png')
    
     
-    sample = image[:sample_dim,:,:,:].squeeze()
-    for i in range(sample.shape[0]): 
-        file_path = os.path.join(save_path, f'sample_in_training_{str(len(files))}_bbcropcrop_{str(i)}.png')
-        save_image(sample[i] , file_path)
+#     sample = image[:sample_dim,:,:,:].squeeze()
+#     for i in range(sample.shape[0]): 
+#         file_path = os.path.join(save_path, f'sample_in_training_{str(len(files))}_bbcropcrop_{str(i)}.png')
+#         save_image(sample[i] , file_path)
         
         
-def visualize_boundingbox(image, bb, cropped_image, cropped_rect, sample_dim):
+# def visualize_boundingbox(image, bb, cropped_image, cropped_rect, sample_dim):
     
-    # visualize transformed sample and transformed heatmaps for target
-    image = np.array(image)
-    if len(image.shape) > 2:
-        image = np.transpose(image, (1, 2, 0))
-        sample = image[:, :, :sample_dim]
-        # target = image[:, :, sample_dim:]
+#     # visualize transformed sample and transformed heatmaps for target
+#     image = np.array(image)
+#     if len(image.shape) > 2:
+#         image = np.transpose(image, (1, 2, 0))
+#         sample = image[:, :, :sample_dim]
+#         # target = image[:, :, sample_dim:]
     
-    cropped_image = np.array(cropped_image)
-    if len(cropped_image.shape) > 2:
-        cropped_image = np.transpose(cropped_image, (1, 2, 0))
-        cropped_sample = cropped_image[:, :, :sample_dim]
-        cropped_target = cropped_image[:, :, sample_dim:]
+#     cropped_image = np.array(cropped_image)
+#     if len(cropped_image.shape) > 2:
+#         cropped_image = np.transpose(cropped_image, (1, 2, 0))
+#         cropped_sample = cropped_image[:, :, :sample_dim]
+#         cropped_target = cropped_image[:, :, sample_dim:]
 
-    rect = patches.Rectangle((bb[1], bb[0]), bb[2], bb[3],
-                             linewidth=2, edgecolor='r', facecolor='none')
-    crop_rect = patches.Rectangle((cropped_rect[1], cropped_rect[0]), cropped_rect[2], cropped_rect[3],
-                                  linewidth=2, edgecolor='y', facecolor='none')
+#     rect = patches.Rectangle((bb[1], bb[0]), bb[2], bb[3],
+#                              linewidth=2, edgecolor='r', facecolor='none')
+#     crop_rect = patches.Rectangle((cropped_rect[1], cropped_rect[0]), cropped_rect[2], cropped_rect[3],
+#                                   linewidth=2, edgecolor='y', facecolor='none')
 
-    # Drawing
-    fig, ax = plt.subplots(ncols=3, tight_layout=True, 
-                figsize=(20,9), gridspec_kw={'width_ratios': [3, 3, 3]})
+#     # Drawing
+#     fig, ax = plt.subplots(ncols=3, tight_layout=True, 
+#                 figsize=(20,9), gridspec_kw={'width_ratios': [3, 3, 3]})
     
-    ax[0].imshow(sample, cmap='gray')#, extent=extent, aspect=aspect)
-    ax[0].add_patch(rect)
-    ax[0].add_patch(crop_rect)
-    ax[0].set_title('Sample with Minimum Rectangle (red) and Crop (yellow)')
+#     ax[0].imshow(sample, cmap='gray')#, extent=extent, aspect=aspect)
+#     ax[0].add_patch(rect)
+#     ax[0].add_patch(crop_rect)
+#     ax[0].set_title('Sample with Minimum Rectangle (red) and Crop (yellow)')
 
-    ax[1].imshow(cropped_sample, cmap='gray')    
-    ax[1].set_title('Randomized Crop Inside Minimum Rectangle')
+#     ax[1].imshow(cropped_sample, cmap='gray')    
+#     ax[1].set_title('Randomized Crop Inside Minimum Rectangle')
 
-    ax[2].imshow(cropped_target, cmap='gray')    
-    ax[2].set_title('Target cropped')
+#     ax[2].imshow(cropped_target, cmap='gray')    
+#     ax[2].set_title('Target cropped')
 
-    # Saving
-    save_path = './test_torchvision_transf'
-    os.makedirs(save_path, exist_ok=True)
-    files = glob.glob(save_path + '/*.png')
-    file_path = os.path.join(save_path, f'sample_in_training_{str(len(files))}_bbcrop.png')
-    fig.savefig(file_path)
-    plt.close('all')
+#     # Saving
+#     save_path = './test_torchvision_transf'
+#     os.makedirs(save_path, exist_ok=True)
+#     files = glob.glob(save_path + '/*.png')
+#     file_path = os.path.join(save_path, f'sample_in_training_{str(len(files))}_bbcrop.png')
+#     fig.savefig(file_path)
+#     plt.close('all')
 
-def visualize_contrast(sample, sample_plot_min, sample_plot_max):
+# def visualize_contrast(sample, sample_plot_min, sample_plot_max):
     
-    sample = np.array(sample)
-    if len(sample.shape) > 2:
-        image = np.transpose(sample, (1, 2, 0))
+#     sample = np.array(sample)
+#     if len(sample.shape) > 2:
+#         image = np.transpose(sample, (1, 2, 0))
 
-    sample_plot_min = np.array(sample_plot_min)
-    if len(sample_plot_min.shape) > 2:
-        image_min = np.transpose(sample_plot_min, (1, 2, 0))
+#     sample_plot_min = np.array(sample_plot_min)
+#     if len(sample_plot_min.shape) > 2:
+#         image_min = np.transpose(sample_plot_min, (1, 2, 0))
 
-    sample_plot_max = np.array(sample_plot_max)
-    if len(sample_plot_max.shape) > 2:
-        image_max = np.transpose(sample_plot_max, (1, 2, 0))
+#     sample_plot_max = np.array(sample_plot_max)
+#     if len(sample_plot_max.shape) > 2:
+#         image_max = np.transpose(sample_plot_max, (1, 2, 0))
        
-    # Drawing
-    fig, ax = plt.subplots(ncols=3, tight_layout=True, 
-                figsize=(20,9), gridspec_kw={'width_ratios': [3, 3, 3]})
+#     # Drawing
+#     fig, ax = plt.subplots(ncols=3, tight_layout=True, 
+#                 figsize=(20,9), gridspec_kw={'width_ratios': [3, 3, 3]})
     
-    ax[0].imshow(image, cmap='gray')    
-    ax[0].set_title('Original contrast')
+#     ax[0].imshow(image, cmap='gray')    
+#     ax[0].set_title('Original contrast')
 
-    ax[1].imshow(image_min, cmap='gray')    
-    ax[1].set_title('Minimum contrast selected')
+#     ax[1].imshow(image_min, cmap='gray')    
+#     ax[1].set_title('Minimum contrast selected')
 
-    ax[2].imshow(image_max, cmap='gray')    
-    ax[2].set_title('Maximum constrast selected')
+#     ax[2].imshow(image_max, cmap='gray')    
+#     ax[2].set_title('Maximum constrast selected')
 
-    # Saving
-    save_path = './test_torchvision_transf'
-    os.makedirs(save_path, exist_ok=True)
-    files = glob.glob(save_path + '/*.png')
-    file_path = os.path.join(save_path, f'sample_in_training_{str(len(files))}_contrast.png')
-    fig.savefig(file_path)
-    plt.close('all')
+#     # Saving
+#     save_path = './test_torchvision_transf'
+#     os.makedirs(save_path, exist_ok=True)
+#     files = glob.glob(save_path + '/*.png')
+#     file_path = os.path.join(save_path, f'sample_in_training_{str(len(files))}_contrast.png')
+#     fig.savefig(file_path)
+#     plt.close('all')
 
-def visualize_gaussianblur(sample, sample_plot_min, sample_plot_max):
+# def visualize_gaussianblur(sample, sample_plot_min, sample_plot_max):
     
-    sample = np.array(sample)
-    if len(sample.shape) > 2:
-        image = np.transpose(sample, (1, 2, 0))
+#     sample = np.array(sample)
+#     if len(sample.shape) > 2:
+#         image = np.transpose(sample, (1, 2, 0))
 
-    sample_plot_min = np.array(sample_plot_min)
-    if len(sample_plot_min.shape) > 2:
-        image_min = np.transpose(sample_plot_min, (1, 2, 0))
+#     sample_plot_min = np.array(sample_plot_min)
+#     if len(sample_plot_min.shape) > 2:
+#         image_min = np.transpose(sample_plot_min, (1, 2, 0))
 
-    sample_plot_max = np.array(sample_plot_max)
-    if len(sample_plot_max.shape) > 2:
-        image_max = np.transpose(sample_plot_max, (1, 2, 0))
+#     sample_plot_max = np.array(sample_plot_max)
+#     if len(sample_plot_max.shape) > 2:
+#         image_max = np.transpose(sample_plot_max, (1, 2, 0))
        
-    # Drawing
-    fig, ax = plt.subplots(ncols=3, tight_layout=True, 
-                figsize=(20,9), gridspec_kw={'width_ratios': [3, 3, 3]})
+#     # Drawing
+#     fig, ax = plt.subplots(ncols=3, tight_layout=True, 
+#                 figsize=(20,9), gridspec_kw={'width_ratios': [3, 3, 3]})
     
-    ax[0].imshow(image, cmap='gray')    
-    ax[0].set_title('Original contrast')
+#     ax[0].imshow(image, cmap='gray')    
+#     ax[0].set_title('Original contrast')
 
-    ax[1].imshow(image_min, cmap='gray')    
-    ax[1].set_title('Minimum blur selected')
+#     ax[1].imshow(image_min, cmap='gray')    
+#     ax[1].set_title('Minimum blur selected')
 
-    ax[2].imshow(image_max, cmap='gray')    
-    ax[2].set_title('Maximum blur selected')
+#     ax[2].imshow(image_max, cmap='gray')    
+#     ax[2].set_title('Maximum blur selected')
 
-    # Saving
-    save_path = './test_torchvision_transf'
-    os.makedirs(save_path, exist_ok=True)
-    files = glob.glob(save_path + '/*.png')
-    file_path = os.path.join(save_path, f'sample_in_training_{str(len(files))}_gaussblur.png')
-    fig.savefig(file_path)
-    plt.close('all')
+#     # Saving
+#     save_path = './test_torchvision_transf'
+#     os.makedirs(save_path, exist_ok=True)
+#     files = glob.glob(save_path + '/*.png')
+#     file_path = os.path.join(save_path, f'sample_in_training_{str(len(files))}_gaussblur.png')
+#     fig.savefig(file_path)
+#     plt.close('all')
 
-def visualize_levels(sample, sample_plot_min, sample_plot_max):
+# def visualize_levels(sample, sample_plot_min, sample_plot_max):
     
-    sample = np.array(sample)
-    if len(sample.shape) > 2:
-        image = np.transpose(sample, (1, 2, 0))
+#     sample = np.array(sample)
+#     if len(sample.shape) > 2:
+#         image = np.transpose(sample, (1, 2, 0))
 
-    sample_plot_min = np.array(sample_plot_min)
-    if len(sample_plot_min.shape) > 2:
-        image_min = np.transpose(sample_plot_min, (1, 2, 0))
+#     sample_plot_min = np.array(sample_plot_min)
+#     if len(sample_plot_min.shape) > 2:
+#         image_min = np.transpose(sample_plot_min, (1, 2, 0))
 
-    sample_plot_max = np.array(sample_plot_max)
-    if len(sample_plot_max.shape) > 2:
-        image_max = np.transpose(sample_plot_max, (1, 2, 0))
+#     sample_plot_max = np.array(sample_plot_max)
+#     if len(sample_plot_max.shape) > 2:
+#         image_max = np.transpose(sample_plot_max, (1, 2, 0))
         
-    # Drawing
-    fig, ax = plt.subplots(ncols=3, tight_layout=True, 
-                figsize=(20,9), gridspec_kw={'width_ratios': [3, 3, 3]}, dpi = 200)
+#     # Drawing
+#     fig, ax = plt.subplots(ncols=3, tight_layout=True, 
+#                 figsize=(20,9), gridspec_kw={'width_ratios': [3, 3, 3]}, dpi = 200)
 
-    ax[0].imshow(image, cmap='gray')    
-    ax[0].set_title('Original')
+#     ax[0].imshow(image, cmap='gray')    
+#     ax[0].set_title('Original')
 
-    ax[1].imshow(image_min, cmap='gray')    
-    ax[1].set_title('Minimum levels preset')
+#     ax[1].imshow(image_min, cmap='gray')    
+#     ax[1].set_title('Minimum levels preset')
 
-    ax[2].imshow(image_max, cmap='gray')    
-    ax[2].set_title('Maximum levels preset')
+#     ax[2].imshow(image_max, cmap='gray')    
+#     ax[2].set_title('Maximum levels preset')
 
-    # Saving
-    save_path = './test_torchvision_transf'
-    os.makedirs(save_path, exist_ok=True)
-    files = glob.glob(save_path + '/*.png')
-    file_path = os.path.join(save_path, f'sample_in_training_{str(len(files))}_levels.png')
-    fig.savefig(file_path, dpi = 'figure')
-    plt.close('all')
+#     # Saving
+#     save_path = './test_torchvision_transf'
+#     os.makedirs(save_path, exist_ok=True)
+#     files = glob.glob(save_path + '/*.png')
+#     file_path = os.path.join(save_path, f'sample_in_training_{str(len(files))}_levels.png')
+#     fig.savefig(file_path, dpi = 'figure')
+#     plt.close('all')
 
 
 def process_UTIMAP_inputdata(path, image, num_labels, target_type):

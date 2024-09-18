@@ -9,7 +9,7 @@ import torch
 
 
 class UTIMAP_DatasetRealGSX(Dataset):
-    """Utility mapping dataset with N masks as ground truth
+"""Utility mapping dataset with N masks as ground truth
 
     Sample : RGB image tensor of $[H, W, C]$ (channel last approach)
     Target : Mmasks tensor of $[H, W, N]$ (values in $[0, 1]$),

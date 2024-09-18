@@ -23,11 +23,11 @@ def get_arguments():
     parser.add_argument('--skip_created_files', default=False, action='store_true', help='Skip already created files in the output directory.')
 
     # Dataset parameters:
-    parser.add_argument("--source", type=str, default='gta5', help='Source dataset. gta5/synthia')
-    parser.add_argument("--target", type=str, default='cityscapes', help='target dataset. cityscapes')
-    parser.add_argument("--src_data_dir", type=str, default='data/gta', help='Path to the directory containing the source dataset.')
-    parser.add_argument("--trg_data_dir", type=str, default='data/cityscapes', help='Path to the directory containing the target dataset.')
-    parser.add_argument("--num_workers", type=int, default=6, help="Number of threads for each worker")
+    parser.add_argument("--source", type=str, default='synth', help='Source dataset. synth')
+    parser.add_argument("--target", type=str, default='real', help='target dataset. real')
+    parser.add_argument("--src_data_dir", type=str, default='data/synth', help='Path to the directory containing the source dataset.')
+    parser.add_argument("--trg_data_dir", type=str, default='data/real', help='Path to the directory containing the target dataset.')
+    parser.add_argument("--num_workers", type=int, default=4, help="Number of threads for each worker")
 
     # generator parameters:
     parser.add_argument('--batch_size', type=int, default=1)
@@ -106,8 +106,7 @@ def post_config(opt):
         for s in sys.argv:
             args += s + ' '
         opt.args = args
-        opt.pretrained_deeplabv2_on_gta     = r'./pretrained/pretrained_semseg_on_gta5.pth'
-        opt.pretrained_deeplabv2_on_synthia = r'./pretrained/pretrained_semseg_on_synthia.pth'
+        opt.pretrained_deeplabv2_on_synth = r'./pretrained/pretrained_semseg_on_synth.pth'
         opt.folder_string = '%sGPU%d/' % (datetime.datetime.now().strftime('%d-%m-%Y::%H:%M:%S'), opt.gpus[0])
         opt.out_folder = '%s/%s' % (opt.checkpoints_dir, opt.folder_string)
         opt.src_data_list = './dataset/{}_list/'.format(opt.source)

@@ -17,6 +17,9 @@ def rgb_image_to_palette_indices(rgb_image, color_to_index):
     Retorna:
     - Array de NumPy con forma (altura, anchura) con los índices de la paleta.
     """
+    #check if the 3rd dimension is 3 if not change it
+    if len(rgb_image.shape) == 3 and rgb_image.shape[2] != 3:
+        rgb_image = rgb_image.transpose((1, 2, 0))
     indexed_image = np.zeros((rgb_image.shape[0], rgb_image.shape[1]), dtype=np.uint8)
     for i in range(rgb_image.shape[0]):
         for j in range(rgb_image.shape[1]):

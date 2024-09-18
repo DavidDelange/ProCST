@@ -1,11 +1,24 @@
+import os.path as osp
+from data_handlers.domain_adaptation_dataset import domainAdaptationDataSet
+from PIL import Image
+import numpy as np
+from core.constants import RESIZE_SHAPE
+import os
+import yaml
+import torchvision.transforms.functional as F
+from torchvision.transforms import Compose, ToTensor, Resize, RandomRotation, RandomHorizontalFlip, RandomVerticalFlip
+from core.transforms_torch import CustomGaussianBlur,RandomCropInsideBoundingBox, BinarizeTargets, CustomRandomContrast
+from torchvision.transforms import InterpolationMode
+
 class SynthDataSet(domainAdaptationDataSet):
     def __init__(self, root, images_list_path, scale_factor, num_scales, curr_scale, set, get_image_label=False, get_image_label_pyramid=False, get_filename=False, get_original_image=False):
-        super(GTA5DataSet, self).__init__(root, images_list_path, scale_factor, num_scales, curr_scale, set, get_image_label=get_image_label)
+        super(SynthDataSet, self).__init__(root, images_list_path, scale_factor, num_scales, curr_scale, set, get_image_label=get_image_label)
         self.domain_resize = RESIZE_SHAPE['synth']
         self.get_image_label_pyramid = get_image_label_pyramid
         self.get_filename = get_filename
         self.get_original_image = get_original_image
         self.id_to_trainid = {1: 1, 2: 2, 3: 3}
+        self.num_labels = len(self.id_to_trainid.keys())
         if images_list_path != None:
             self.images_list_file = osp.join(images_list_path, '%s.txt' % set)
             self.img_ids = [image_id.strip().split('.')[0] for image_id in open(self.images_list_file)]
@@ -14,15 +27,17 @@ class SynthDataSet(domainAdaptationDataSet):
         return len(self.img_ids)
 
     def __getitem__(self, index):
-        image, label = self.__getitem_seescans__(index)
+        image, label = self.getitem_seescans(index)
 
-        label, label_copy, labels_pyramid = None, None, None = None, None, None
+        label_copy, labels_pyramid = None, None 
         if self.get_image_label or self.get_image_label_pyramid:
             if self.get_image_label_pyramid:
                 labels_pyramid =  self.GeneratePyramid(label, is_label=True)
                 labels_pyramid = [self.convert_to_class_ids(label_scale) for label_scale in labels_pyramid]
             else:
                 label = self.convert_to_class_ids(label)
+        else: 
+            label = None
 
         scales_pyramid = self.GeneratePyramid(image)
         if self.get_image_label:
@@ -32,7 +47,7 @@ class SynthDataSet(domainAdaptationDataSet):
         else:
             return scales_pyramid if not self.get_filename else scales_pyramid, self.img_ids[index]
 
-       def getitem_seescans(self, index):
+    def getitem_seescans(self, index):
         """Get image and mask from annotation file
 
         Parameters
@@ -50,6 +65,7 @@ class SynthDataSet(domainAdaptationDataSet):
         """
         # Get sample and target by index
         sample, sample_length = self.get_sample(index)     
+        self.sample_shape = sample.shape
         target = self.get_target(index)
         sample_channels = sample.shape[-1]
 
@@ -68,10 +84,10 @@ class SynthDataSet(domainAdaptationDataSet):
                 RandomRotation(degrees=10, expand=False),
                 RandomHorizontalFlip(p=0.5),
                 RandomVerticalFlip(p=0.5),
-                RandomCropInsideBoundingBox(image_dist_meters=sample_length, target_crop_meters=10, min_percentage=0.3, p=1, stage=stage, verbose=False),
-                Resize(size=(512, 512)),
+                RandomCropInsideBoundingBox(image_dist_meters=sample_length, target_crop_meters=10, min_percentage=0.3, p=1, stage='train', verbose=False),
+                Resize(size=(512, 512), interpolation=InterpolationMode.NEAREST),
                 # CustomGaussianBlur(kernel_size_range=[5, 9], sigma_range=[0.5, 2], p=0.3, num_labels=3),
-                BinarizeTargets(len(labels))
+                BinarizeTargets(self.num_labels)
             ])            
             transformed_composition = transforms_pipeline(composition)
 
@@ -80,8 +96,8 @@ class SynthDataSet(domainAdaptationDataSet):
             sample = transformed_composition[:sample_channels]
             target = transformed_composition[sample_channels:]
 
-            sample = Image.fromarray(sample)
-            target = Image.fromarray(target)
+            sample = F.to_pil_image(sample.cpu())
+            target = F.to_pil_image(target.cpu())
         return sample, target
         
 
@@ -107,7 +123,7 @@ class SynthDataSet(domainAdaptationDataSet):
         # Load sample and convert to np.darray
         # TODO: check if .convert RGB to the PIL image is required
         # TODO: check if returning PIL image only (not numpy) works
-        sample = [np.expand_dims(self._read_image_as_numpy(sample_path)[:,:,0], axis=-1)]
+        sample = np.expand_dims(self._read_image_as_numpy(sample_path)[:,:,0], axis=-1)
 
         # print(sample.shape)
         return sample, sample_length
@@ -132,7 +148,7 @@ class SynthDataSet(domainAdaptationDataSet):
                                    Name_image_2
         where 0,1,2 are the labels number 
         """
-        targets = np.zeros(shape=(self.sample_shape[0], self.sample_shape[1], self.num_labels), dtype=np.uint8)
+        targets = np.zeros(shape=(self.sample_shape[0], self.sample_shape[1],  self.num_labels), dtype=np.uint8)
         
         if self.get_image_label is not False:
             target_name = self.img_ids[index] + '.png'
@@ -151,8 +167,8 @@ class SynthDataSet(domainAdaptationDataSet):
         return targets
 
     def get_sample_length(self, index):
-        name = self.img_ids[index] + '.yml'
-        image = osp.join(self.root, "%s/yaml/%s" % (self.set, name))
+        name = self.img_ids[index] + '.yaml'
+        yaml_path = osp.join(self.root, "%s/yaml/%s" % (self.set, name))
         sample_length = 0
         if os.path.exists(yaml_path):
             with open(yaml_path, 'rb') as f:
@@ -164,9 +180,34 @@ class SynthDataSet(domainAdaptationDataSet):
 
         return sample_length
 
-     def _read_image_as_numpy(self, path_to_image):
+    def _read_image_as_numpy(self, path_to_image):
         try:
             return np.asarray(Image.open(path_to_image).convert('RGB'))
         except Exception as e:
             print(f"Failed to read image at path: {path_to_image}")
             raise e
+
+
+if __name__ == '__main__':
+    root = '/home/ddel/workspace/data/seescans/synth'
+    images_list_path = '/home/ddel/workspace/repositories/ProCST/dataset/synth'
+    scale_factor = 0.5
+    num_scales = 2
+    curr_scale = 0
+    set = 'train'
+    get_image_label=False
+    get_image_label_pyramid=True
+    get_filename=False
+    get_original_image=False
+    dataset = SynthDataSet(root, 
+                        images_list_path, 
+                        scale_factor, 
+                        num_scales, 
+                        curr_scale, 
+                        set, 
+                        get_image_label,
+                        get_image_label_pyramid,
+                        get_filename, 
+                        get_original_image)
+    print(dataset[0])
+    print(len(dataset))
