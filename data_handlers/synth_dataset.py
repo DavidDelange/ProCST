@@ -5,6 +5,7 @@ import numpy as np
 from core.constants import RESIZE_SHAPE
 import os
 import yaml
+import torch
 import torchvision.transforms.functional as F
 from torchvision.transforms import Compose, ToTensor, Resize, RandomRotation, RandomHorizontalFlip, RandomVerticalFlip
 from core.transforms_torch import CustomGaussianBlur,RandomCropInsideBoundingBox, BinarizeTargets, CustomRandomContrast
@@ -17,25 +18,31 @@ class SynthDataSet(domainAdaptationDataSet):
         self.get_image_label_pyramid = get_image_label_pyramid
         self.get_filename = get_filename
         self.get_original_image = get_original_image
-        self.id_to_trainid = {1: 1, 2: 2, 3: 3}
-        self.num_labels = len(self.id_to_trainid.keys())
+        self.id_to_trainid = {0: 0, 1: 1, 2: 2, 3: 3}
+        self.num_labels = len(self.id_to_trainid.keys()) - 1
         if images_list_path != None:
             self.images_list_file = osp.join(images_list_path, '%s.txt' % set)
             self.img_ids = [image_id.strip().split('.')[0] for image_id in open(self.images_list_file)]
-
+        if self.set =='train_semseg_net':
+            self.set = 'train'
+        if self.set == 'val_semseg_net':
+            self.set = 'train'
     def __len__(self):
         return len(self.img_ids)
 
     def __getitem__(self, index):
-        image, label = self.getitem_seescans(index)
+        image, label, background = self.getitem_seescans(index)
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
 
         label_copy, labels_pyramid = None, None 
         if self.get_image_label or self.get_image_label_pyramid:
             if self.get_image_label_pyramid:
                 labels_pyramid =  self.GeneratePyramid(label, is_label=True)
-                labels_pyramid = [self.convert_to_class_ids(label_scale) for label_scale in labels_pyramid]
+                background_pyramid =  self.GeneratePyramid(background, is_label=True)
+                labels_pyramid = [self.mask_label_copy(self.convert_to_class_ids(label_scale), background) for label_scale, background in zip(labels_pyramid, background_pyramid)]
             else:
-                label = self.convert_to_class_ids(label)
+                label = self.mask_label_copy(self.convert_to_class_ids(label), background)
         else: 
             label = None
 
@@ -68,10 +75,12 @@ class SynthDataSet(domainAdaptationDataSet):
         self.sample_shape = sample.shape
         target = self.get_target(index)
         sample_channels = sample.shape[-1]
+        target_channels = target.shape[-1]
+        background = self.get_background(index)
 
         # Concatenate sample and targets
         # Shape is [num_channels_sample + num_channels_target, H, W]
-        composition = np.concatenate((sample, target), axis=2)
+        composition = np.concatenate((sample, target, background), axis=2)
 
         # Apply transforms if set
         if self.get_original_image:
@@ -87,20 +96,19 @@ class SynthDataSet(domainAdaptationDataSet):
                 RandomCropInsideBoundingBox(image_dist_meters=sample_length, target_crop_meters=10, min_percentage=0.3, p=1, stage='train', verbose=False),
                 Resize(size=(512, 512), interpolation=InterpolationMode.NEAREST),
                 # CustomGaussianBlur(kernel_size_range=[5, 9], sigma_range=[0.5, 2], p=0.3, num_labels=3),
-                BinarizeTargets(self.num_labels)
+                BinarizeTargets(self.num_labels + 1)
             ])            
             transformed_composition = transforms_pipeline(composition)
 
             # Return sample and target tuple
             # First sample_channels channels correspond to sample, rest correspond to target
             sample = transformed_composition[:sample_channels]
-            target = transformed_composition[sample_channels:]
+            target = transformed_composition[sample_channels:target_channels+sample_channels]
+            background = transformed_composition[target_channels+sample_channels:]
 
             sample = F.to_pil_image(sample.cpu())
-            target = F.to_pil_image(target.cpu())
-        return sample, target
+        return sample, target, background
         
-
     def get_sample(self, index):
         """Load the input image as RGB tensor.
 
@@ -150,7 +158,7 @@ class SynthDataSet(domainAdaptationDataSet):
         """
         targets = np.zeros(shape=(self.sample_shape[0], self.sample_shape[1],  self.num_labels), dtype=np.uint8)
         
-        if self.get_image_label is not False:
+        if self.get_image_label is not False or self.get_image_label_pyramid is not False:
             target_name = self.img_ids[index] + '.png'
             target_path = osp.join(self.root, "%s/labels/%s" % (self.set, target_name))
             
@@ -159,7 +167,7 @@ class SynthDataSet(domainAdaptationDataSet):
             # TODO: check if returning PIL image only (not numpy) works
 
             targets = ([self._read_image_as_numpy(target_path)[:, :, label_channel]
-                        for label_channel, _ in enumerate(self.id_to_trainid.keys())])
+                        for label_channel in range(self.num_labels)])
             
             # Concatenate all masks in a single np.darray, channel last approach
             targets = np.stack(targets, axis=-1)
@@ -187,6 +195,27 @@ class SynthDataSet(domainAdaptationDataSet):
             print(f"Failed to read image at path: {path_to_image}")
             raise e
 
+    def get_background(self, index):
+        """Load background image
+
+        Parameters
+        ----------
+        index : int
+            Index of the annotation file to load the background
+
+        Returns
+        -------
+        numpy.ndarray
+            RGB image tensor of $[H, W, C]$ (channel last approach)
+        """
+        # Get path to background
+        background_name = self.img_ids[index] + '.png'
+        background_path = osp.join(self.root, "%s/targets_road_with_gaps/%s" % (self.set, background_name))
+
+        # Load background and convert to np.darray
+        background = np.expand_dims(self._read_image_as_numpy(background_path)[:,:,2], axis=-1)
+
+        return background
 
 if __name__ == '__main__':
     root = '/home/ddel/workspace/data/seescans/synth'

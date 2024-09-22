@@ -45,7 +45,8 @@ def get_arguments():
     parser.add_argument('--num_scales', type=int, help='number of scales in the pyramid', default=2)
 
     # optimization parameters:
-    parser.add_argument('--epochs_per_scale', type=int, default=40, help='number of epochs to train per scale')
+    # parser.add_argument('--epochs_per_scale', type=int, default=40, help='number of epochs to train per scale')
+    parser.add_argument('--epochs_per_scale', type=int, default=1, help='number of epochs to train per scale')
     parser.add_argument('--gamma', type=float, help='scheduler gamma', default=0.1)
     parser.add_argument('--lr_g', type=float, default=0.0001, help='learning rate, default=0.0001')
     parser.add_argument('--lr_d', type=float, default=0.0001, help='learning rate, default=0.0001')

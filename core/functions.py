@@ -41,6 +41,9 @@ def reset_grads(model, require_grad):
     return model
 
 def imresize_torch(image_batch, scale, mode):
+    if len(image_batch.shape) == 3:
+        image_batch = image_batch.unsqueeze(0)
+   
     new_size = np.ceil(scale * np.array([image_batch.shape[2], image_batch.shape[3]])).astype(np.int)
     if mode=='bicubic':
         return nn.functional.interpolate(image_batch, size=(new_size[0], new_size[1]), mode=mode, align_corners=True)
