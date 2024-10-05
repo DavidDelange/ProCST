@@ -1,10 +1,10 @@
 def main(opt):
     opt.num_scales= 0
     opt.curr_scale= opt.num_scales
-    opt.num_steps= 16          # TODO: change value to 250e3
+    opt.num_steps= 25000      # TODO: change value to 250e3
     source_train_loader = CreateSrcDataLoader(opt, 'train_semseg_net', get_image_label_pyramid=True)
     source_val_loader = CreateSrcDataLoader(opt, 'val_semseg_net', get_image_label_pyramid=True)
-    opt.epoch_size = 1 #TODO: change value to len(source_train_loader.dataset)
+    opt.epoch_size = len(source_train_loader.dataset) #TODO: change value to len(source_train_loader.dataset)
     opt.save_pics_rate = set_pics_save_rate(opt.pics_per_epoch, opt.batch_size, opt)
     if opt.continue_train_from_path != '':
         _, semseg_optimizer = CreateSemsegModel(opt)
@@ -72,7 +72,7 @@ def main(opt):
         print('train semseg: starting validation after epoch %d.' % epoch_num)
         iou, miou, cm = calculte_validation_accuracy(semseg_net, source_val_loader, opt, epoch_num)
         save_epoch_accuracy(opt.tb, 'Validtaion', iou, miou, epoch_num)
-        if epoch_num > 15 and miou > best_miou:
+        if epoch_num > 4 and miou > best_miou:
             best_miou = miou
             torch.save(semseg_net.module, '%s/semseg_trained_on_%s_miou_%.2f.pth' % (opt.out_folder, opt.source, miou))
         epoch_num += 1
@@ -145,6 +145,6 @@ if __name__ == "__main__":
             factor = max(factor, 0)
             return [base_lr * factor for base_lr in self.base_lrs]
     opt.gpu_id = 0
-    opt.batch_size = 1        
+    opt.batch_size = 16
     main(opt)
 

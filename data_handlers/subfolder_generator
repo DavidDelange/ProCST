@@ -1,0 +1,37 @@
+import os
+import shutil
+import os.path as osp
+
+
+# Define los directorios de origen y destino
+origen = 'test'
+
+
+# Lista de subdirectorios a procesar
+subdirectorios = ['samples', 'targets_perfect', 'targets_road_with_gaps', 'yaml']
+def generate_directory(path, path_i, name):
+    # Itera sobre cada subdirectorio
+    for subdir in subdirectorios:
+        origen_subdir = osp.join(path, path_i, origen, subdir)
+        destino_subdir = osp.join(path, subdir)
+        
+        # Crea el directorio de destino si no existe
+        os.makedirs(destino_subdir, exist_ok=True)
+        
+        # Mueve los archivos del subdirectorio a la nueva ubicación
+        for filename in os.listdir(origen_subdir):
+            origen_archivo = os.path.join(origen_subdir, filename)
+            
+            if os.path.isfile(origen_archivo):
+                # Mueve el archivo al nuevo directorio con el prefijo "001_"
+                nuevo_nombre = f"00{name+3}_{filename}"
+                destino_archivo = os.path.join(destino_subdir, nuevo_nombre)
+                shutil.move(origen_archivo, destino_archivo)
+
+    print("Archivos movidos correctamente.")
+
+if __name__ == '__main__':
+    path = "/user_volume_david_delange/data/procst/real/train"
+    for i, path_i in enumerate(os.listdir(path)):
+        generate_directory(path, path_i, i)
+    

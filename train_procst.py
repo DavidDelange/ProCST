@@ -36,6 +36,8 @@ if __name__ == '__main__':
     from data_handlers import CreateTrgDataLoader
     from core.training import train
     import numpy as np
+    opt.gpus = [0,1,2,3,4,5]
     main(opt)
+    
 
 

@@ -2,7 +2,7 @@ import os
 
 def generate_data_list(root_path, dataset, set_name):
     # Define the dataset directory
-    dataset_dir = f"./dataset/{dataset}"
+    dataset_dir = f"/user_volume_david_delange/ProCST/dataset/{dataset}"
     os.makedirs(dataset_dir, exist_ok=True)  # Ensure the full directory is created
 
     # Define the output file
@@ -10,7 +10,7 @@ def generate_data_list(root_path, dataset, set_name):
 
     # Open the output file and write file names
     with open(output_file, "w") as file:
-        for root, dirs, files in os.walk(f"{root_path}/{dataset}/{set_name}/images"):
+        for root, dirs, files in os.walk(f"{root_path}/{dataset}/{set_name}/samples"):
             for filename in files:
                 file.write(filename + "\n")    
 
@@ -35,6 +35,6 @@ def split_data_file(path, set_name):
         val_file.writelines(lines[split_point:])
 
 if __name__ == "__main__":
-    # generate_data_list('/home/ddel/workspace/data/seescans', 'real', "train")
-    # generate_data_list('/home/ddel/workspace/data/seescans', 'synth', "train")
-    split_data_file('/home/ddel/workspace/repositories/ProCST/dataset/synth', 'train.txt')
+    #generate_data_list('/user_volume_david_delange/data/procst', 'real', "val")
+    #generate_data_list('/user_volume_david_delange/data/procst', 'synth', "train")
+    split_data_file("/user_volume_david_delange/ProCST/dataset/synth", 'train.txt')

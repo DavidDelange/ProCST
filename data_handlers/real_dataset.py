@@ -3,6 +3,7 @@ from data_handlers.domain_adaptation_dataset import domainAdaptationDataSet
 from PIL import Image
 import numpy as np
 from core.constants import RESIZE_SHAPE
+from core.functions import RGBImageToNumpy
 import os
 import yaml
 import torchvision.transforms.functional as F
@@ -120,7 +121,7 @@ class RealDataSet(domainAdaptationDataSet):
         """
         # Get path to sample
         sample_name = self.img_ids[index] + '.png'
-        sample_path = osp.join(self.root, "%s/images/%s" % (self.set, sample_name))
+        sample_path = osp.join(self.root, "%s/samples/%s" % (self.set, sample_name))
         
         sample_length = self.get_sample_length(index)
 
@@ -155,7 +156,7 @@ class RealDataSet(domainAdaptationDataSet):
         
         if self.get_image_label is not False:
             target_name = self.img_ids[index] + '.png'
-            target_path = osp.join(self.root, "%s/labels/%s" % (self.set, target_name))
+            target_path = osp.join(self.root, "%s/targets_perfect/%s" % (self.set, target_name))
             
             # Load sample and convert to np.darray
             # TODO: check if .convert RGB to the PIL image is required
@@ -213,8 +214,8 @@ class RealDataSet(domainAdaptationDataSet):
         return background
 
 if __name__ == '__main__':
-    root = '/home/ddel/workspace/data/seescans/real'
-    images_list_path = '/home/ddel/workspace/repositories/ProCST/dataset/real_list'
+    root = '/user_volume_david_delange/data/procst/real'
+    images_list_path = '/user_volume_david_delange/ProCST/dataset/real_list'
     scale_factor = 0.5
     num_scales = 2
     curr_scale = 1

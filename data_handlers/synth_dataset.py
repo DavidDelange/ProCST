@@ -124,7 +124,7 @@ class SynthDataSet(domainAdaptationDataSet):
         """
         # Get path to sample
         sample_name = self.img_ids[index] + '.png'
-        sample_path = osp.join(self.root, "%s/images/%s" % (self.set, sample_name))
+        sample_path = osp.join(self.root, "%s/samples/%s" % (self.set, sample_name))
         
         sample_length = self.get_sample_length(index)
 
@@ -160,7 +160,7 @@ class SynthDataSet(domainAdaptationDataSet):
         
         if self.get_image_label is not False or self.get_image_label_pyramid is not False:
             target_name = self.img_ids[index] + '.png'
-            target_path = osp.join(self.root, "%s/labels/%s" % (self.set, target_name))
+            target_path = osp.join(self.root, "%s/targets_perfect/%s" % (self.set, target_name))
             
             # Load sample and convert to np.darray
             # TODO: check if .convert RGB to the PIL image is required
@@ -210,7 +210,7 @@ class SynthDataSet(domainAdaptationDataSet):
         """
         # Get path to background
         background_name = self.img_ids[index] + '.png'
-        background_path = osp.join(self.root, "%s/targets_road_with_gaps/%s" % (self.set, background_name))
+        background_path = osp.join(self.root, "%s/samples/%s" % (self.set, background_name))
 
         # Load background and convert to np.darray
         background = np.expand_dims(self._read_image_as_numpy(background_path)[:,:,2], axis=-1)
@@ -218,8 +218,8 @@ class SynthDataSet(domainAdaptationDataSet):
         return background
 
 if __name__ == '__main__':
-    root = '/home/ddel/workspace/data/seescans/synth'
-    images_list_path = '/home/ddel/workspace/repositories/ProCST/dataset/synth_list'
+    root = '/user_volume_david_delange/data/procst/synth'
+    images_list_path = '/user_volume_david_delange/ProCST/dataset/synth_list'
     scale_factor = 0.5
     num_scales = 2
     curr_scale = 0
