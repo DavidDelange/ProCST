@@ -1,12 +1,11 @@
 from torch.utils import data
-from data_handlers.gta5_dataset import GTA5DataSet
-from data_handlers.cityscapes_dataset import cityscapesDataSet
-from data_handlers.synthia_dataset import SynthiaDataSet
+from data_handlers.synth_dataset import SynthDataSet
+from data_handlers.real_dataset import RealDataSet
+from data_handlers.domain_adaptation_dataset import domainAdaptationDataSet
 
-
-def CreateSrcDataLoader(opt, set='train', get_image_label=False, get_image_label_pyramid=False, get_filename=False, get_original_image=False):
-    if opt.source == 'gta5':
-        source_dataset = GTA5DataSet(opt.src_data_dir,
+def CreateSrcDataLoader(opt, set='train', get_image_label=False, get_image_label_pyramid=False, get_filename=False, get_original_image=False, get_sit_image=False):
+    if opt.source == 'synth' or opt.source == 'synth_daformer':
+        source_dataset = SynthDataSet(opt.src_data_dir,
                                      opt.src_data_list,
                                      opt.scale_factor,
                                      opt.num_scales,
@@ -15,20 +14,10 @@ def CreateSrcDataLoader(opt, set='train', get_image_label=False, get_image_label
                                      get_image_label=get_image_label,
                                      get_image_label_pyramid=get_image_label_pyramid,
                                      get_filename=get_filename,
-                                     get_original_image=get_original_image)
-    elif opt.source == 'synthia':
-        source_dataset = SynthiaDataSet(opt.src_data_dir,
-                                        opt.src_data_list,
-                                        opt.scale_factor,
-                                        opt.num_scales,
-                                        opt.curr_scale,
-                                        set,
-                                        get_image_label=get_image_label,
-                                        get_image_label_pyramid=get_image_label_pyramid,
-                                        get_filename=get_filename,
-                                        get_original_image=get_original_image)
+                                     get_original_image=get_original_image,
+                                     get_sit_image=get_sit_image)
     else:
-        raise ValueError('The source dataset mush be either gta5 or synthia')
+        raise ValueError('The source dataset mush be synth')
 
     source_dataloader = data.DataLoader(source_dataset,
                                         batch_size=opt.batch_size,
@@ -40,7 +29,7 @@ def CreateSrcDataLoader(opt, set='train', get_image_label=False, get_image_label
 
 
 def CreateTrgDataLoader(opt, set='train', get_image_label=False, get_scales_pyramid=False):
-    target_dataset = cityscapesDataSet(opt.trg_data_dir,
+    target_dataset = RealDataSet(opt.trg_data_dir,
                                        opt.trg_data_list,
                                        opt.scale_factor,
                                        opt.num_scales,

@@ -1,9 +1,12 @@
 import numpy as np
-from core.constants import IGNORE_LABEL, IMG_CROP_SIZE_SEMSEG
-from core.functions import GeneratePyramid
+from core.constants import IGNORE_LABEL, IMG_CROP_SIZE_SEMSEG, PALETTE
+from core.functions import GeneratePyramid, rgb_image_to_palette_indices
 import os.path as osp
+import torch.nn as nn
 from torch.utils import data
 from torchvision import transforms
+from torchvision.transforms import InterpolationMode, Compose, ToTensor, Resize, RandomRotation, RandomHorizontalFlip, RandomVerticalFlip
+from core.transforms_torch import CustomGaussianBlur,RandomCropInsideBoundingBox, BinarizeTargets, CustomRandomContrast
 
 class domainAdaptationDataSet(data.Dataset):
     def __init__(self, root, images_list_path, scale_factor, num_scales, curr_scale, set, get_image_label=False):
@@ -30,10 +33,17 @@ class domainAdaptationDataSet(data.Dataset):
 
     def convert_to_class_ids(self, label_image):
         label = np.asarray(label_image, np.float32)
+        label = rgb_image_to_palette_indices(label, PALETTE)
         label_copy = self.ignore_label * np.ones(label.shape, dtype=np.float32)
         for k, v in self.id_to_trainid.items():
             label_copy[label == k] = v
         return label_copy
+
+    def mask_label_copy(self, label_copy, mask):
+        mask = np.asarray(mask.squeeze(0), np.float32)
+        label_copy[mask == 0] = 255
+        return label_copy
+
 
     def GeneratePyramid(self, image, is_label=False):
         scales_pyramid = GeneratePyramid(image, self.num_scales, self.curr_scale, self.scale_factor, is_label=is_label)

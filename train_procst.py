@@ -36,5 +36,8 @@ if __name__ == '__main__':
     from data_handlers import CreateTrgDataLoader
     from core.training import train
     import numpy as np
+   
     main(opt)
+    
+
 

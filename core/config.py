@@ -11,23 +11,23 @@ def get_arguments():
     # load, input, save configurations:
     parser.add_argument("--gpus", type=int, nargs='+', help="String that contains available GPUs to use", default=[0])
     parser.add_argument('--manual_seed', default=1337, type=int, help='manual seed')
-    parser.add_argument('--continue_train_from_path', type=str, help='Path to folder that contains all networks and continues to train from there', default='')
-    parser.add_argument('--resume_to_epoch', default=1, type=int, help='Resumes training from specified epoch')
+    parser.add_argument('--continue_train_from_path', default= '/user_volume_david_delange/ProCST/TrainedModels/06-10-2024::12:56:30GPU0/2',type=str, help='Path to folder that contains all networks and continues to train from there')
+    parser.add_argument('--resume_to_epoch', default=12, type=int, help='Resumes training from specified epoch')
     parser.add_argument('--resume_step', default=1, type=int, help='Resumes Semseg training to specified step')
     parser.add_argument('--nc_im', type=int, help='image # channels', default=3)
     parser.add_argument('--no_drop_last', default=True, action='store_false', help='When this flag turns on, last batch is not dropped. Regular behavour: drops last batch in training mode.')
 
     #SiT dataset configurations:
-    parser.add_argument("--sit_output_path", type=str, default=None, help="Path to output SiT generated dataset")
-    parser.add_argument("--trained_procst_path", type=str, default=None, help="Path to pretrained ProCST model.")
+    parser.add_argument("--sit_output_path", type=str, default='/user_volume_david_delange/data/procst/sit', help="Path to output SiT generated dataset")
+    parser.add_argument("--trained_procst_path", type=str, default='/user_volume_david_delange/ProCST/TrainedModels/07-10-2024::19:33:02GPU0/Gst.pth', help="Path to pretrained ProCST model.")
     parser.add_argument('--skip_created_files', default=False, action='store_true', help='Skip already created files in the output directory.')
 
     # Dataset parameters:
-    parser.add_argument("--source", type=str, default='gta5', help='Source dataset. gta5/synthia')
-    parser.add_argument("--target", type=str, default='cityscapes', help='target dataset. cityscapes')
-    parser.add_argument("--src_data_dir", type=str, default='data/gta', help='Path to the directory containing the source dataset.')
-    parser.add_argument("--trg_data_dir", type=str, default='data/cityscapes', help='Path to the directory containing the target dataset.')
-    parser.add_argument("--num_workers", type=int, default=6, help="Number of threads for each worker")
+    parser.add_argument("--source", type=str, default='synth', help='Source dataset. synth')
+    parser.add_argument("--target", type=str, default='real', help='target dataset. real')
+    parser.add_argument("--src_data_dir", type=str, default='/user_volume_david_delange/data/procst/synth', help='Path to the directory containing the source dataset.')
+    parser.add_argument("--trg_data_dir", type=str, default='/user_volume_david_delange/data/procst/real', help='Path to the directory containing the target dataset.')
+    parser.add_argument("--num_workers", type=int, default=18, help="Number of threads for each worker")
 
     # generator parameters:
     parser.add_argument('--batch_size', type=int, default=1)
@@ -45,7 +45,7 @@ def get_arguments():
     parser.add_argument('--num_scales', type=int, help='number of scales in the pyramid', default=2)
 
     # optimization parameters:
-    parser.add_argument('--epochs_per_scale', type=int, default=40, help='number of epochs to train per scale')
+    parser.add_argument('--epochs_per_scale', type=int, default=15, help='number of epochs to train per scale')
     parser.add_argument('--gamma', type=float, help='scheduler gamma', default=0.1)
     parser.add_argument('--lr_g', type=float, default=0.0001, help='learning rate, default=0.0001')
     parser.add_argument('--lr_d', type=float, default=0.0001, help='learning rate, default=0.0001')
@@ -66,7 +66,7 @@ def get_arguments():
     # Semseg network parameters:
     parser.add_argument("--no_semseg", default=False, action='store_true', help="Disables semseg loss (cyclic label loss, CE on SIT images) at last scale.")
     parser.add_argument("--model", type=str, required=False, default='DeepLabV2', help="available options : DeepLabV2, DeepLab and VGG")
-    parser.add_argument("--num_classes", type=int, required=False, default=19, help="Number of classes in the segmentation task. Default - 19")
+    parser.add_argument("--num_classes", type=int, required=False, default=4, help="Number of classes in the segmentation task. Default - 19")
     parser.add_argument('--lr_semseg', type=float, default=0.0001, help='learning rate, default=0.0001')
     parser.add_argument("--weight-decay", type=float, default=0.0005, help="Regularisation parameter for L2-loss.")
 
@@ -106,8 +106,7 @@ def post_config(opt):
         for s in sys.argv:
             args += s + ' '
         opt.args = args
-        opt.pretrained_deeplabv2_on_gta     = r'./pretrained/pretrained_semseg_on_gta5.pth'
-        opt.pretrained_deeplabv2_on_synthia = r'./pretrained/pretrained_semseg_on_synthia.pth'
+        opt.pretrained_deeplabv2_on_synth = r'./pretrained/pretrained_semseg_on_synth.pth'
         opt.folder_string = '%sGPU%d/' % (datetime.datetime.now().strftime('%d-%m-%Y::%H:%M:%S'), opt.gpus[0])
         opt.out_folder = '%s/%s' % (opt.checkpoints_dir, opt.folder_string)
         opt.src_data_list = './dataset/{}_list/'.format(opt.source)

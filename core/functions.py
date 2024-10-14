@@ -6,6 +6,27 @@ from PIL import Image
 import os
 from core.constants import palette, NUM_CLASSES, IGNORE_LABEL
 
+def rgb_image_to_palette_indices(rgb_image, color_to_index):
+    """
+    Convierte una imagen RGB a una imagen de índices de paleta.
+
+    Parámetros:
+    - rgb_image: Array de NumPy de la imagen RGB con forma (altura, anchura, 3).
+    - color_to_index: Diccionario de mapeo de colores RGB a índices de paleta.
+
+    Retorna:
+    - Array de NumPy con forma (altura, anchura) con los índices de la paleta.
+    """
+    #check if the 3rd dimension is 3 if not change it
+    if len(rgb_image.shape) == 3 and rgb_image.shape[2] != 3:
+        rgb_image = rgb_image.transpose((1, 2, 0))
+    indexed_image = np.zeros((rgb_image.shape[0], rgb_image.shape[1]), dtype=np.uint8)
+    for i in range(rgb_image.shape[0]):
+        for j in range(rgb_image.shape[1]):
+            pixel = tuple(rgb_image[i, j])
+            indexed_image[i, j] = color_to_index[pixel]
+    return indexed_image
+
 def denorm(x):
     out = (x + 1) / 2
     return out.clamp(0, 1)
@@ -20,6 +41,9 @@ def reset_grads(model, require_grad):
     return model
 
 def imresize_torch(image_batch, scale, mode):
+    if len(image_batch.shape) == 3:
+        image_batch = image_batch.unsqueeze(0)
+   
     new_size = np.ceil(scale * np.array([image_batch.shape[2], image_batch.shape[3]])).astype(np.int)
     if mode=='bicubic':
         return nn.functional.interpolate(image_batch, size=(new_size[0], new_size[1]), mode=mode, align_corners=True)
@@ -138,6 +162,8 @@ def ImageToNumpy(im):
     im = np.asarray(im, np.float32)
     if len(im.shape) == 3:
         im = np.transpose(im, (2, 0, 1))
+    elif len(im.shape) == 2:
+        im = np.expand_dims(im, axis=0)
     return im
 
 class runningScore(object):

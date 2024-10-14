@@ -103,13 +103,11 @@ def train_single_scale(netDst, netGst, netDts, netGts, Gst: list, Gts: list, Dst
                                     weight_decay=opt.weight_decay)
         optimizer_semseg_gen = optim.SGD(semseg_cs.module.optim_parameters(opt) if (len(opt.gpus) > 1) else semseg_cs.optim_parameters(opt), lr=opt.lr_semseg / 4,
                                        momentum=opt.momentum, weight_decay=opt.weight_decay)
-        if opt.source == 'gta5':
-            semseg_pretrained_source = nn.DataParallel(torch.load(opt.pretrained_deeplabv2_on_gta)) if (len(opt.gpus) > 1) else torch.load(opt.pretrained_deeplabv2_on_gta)
-        elif opt.source == 'synthia':
-            semseg_pretrained_source = nn.DataParallel(torch.load(opt.pretrained_deeplabv2_on_synthia)) if (len(opt.gpus) > 1) else torch.load(opt.pretrained_deeplabv2_on_synthia)
+        if opt.source == 'synth':
+            semseg_pretrained_source = nn.DataParallel(torch.load(opt.pretrained_deeplabv2_on_synth)) if (len(opt.gpus) > 1) else torch.load(opt.pretrained_deeplabv2_on_synth)
         else:
             raise NotImplemented()
-        semseg_pretrained_source.eval()
+        semseg_pretrained_source.eval()  ## TODO: revisar e incluir dentro del bloque del if
     else:
         optimizer_semseg_cs, optimizer_semseg_gen, semseg_pretrained_source = None, None, None
 
@@ -227,7 +225,7 @@ def train_single_scale(netDst, netGst, netDts, netGts, Gst: list, Gts: list, Dst
                 optimizer_semseg_cs.zero_grad()
                 if not opt.warmup:
                     optimizerGst.zero_grad()
-                # Train semseg on GTA5 image converted to CS, using GTA5 labels:
+                # Train semseg on SYNTH image converted to CS, using SYNTH labels:
                 prev = concat_pyramid(Gst, source_scales, opt)
                 fake_image = netGst(source_scales[-1], prev)
                 semseg_softs, semseg_loss = semseg_cs(fake_image, source_label)

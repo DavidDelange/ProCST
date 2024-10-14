@@ -1,19 +1,26 @@
-NUM_CLASSES = 19
+NUM_CLASSES = 4
 IGNORE_LABEL = 255
 
-palette = [128, 64, 128, 244, 35, 232, 70, 70, 70, 102, 102, 156, 190, 153, 153, 153, 153, 153, 250, 170, 30,
-           220, 220, 0, 107, 142, 35, 152, 251, 152, 70, 130, 180, 220, 20, 60, 255, 0, 0, 0, 0, 142, 0, 0, 70,
-           0, 60, 100, 0, 80, 100, 0, 0, 230, 119, 11, 32]
+palette = [0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255]
 zero_pad = 256 * 3 - len(palette)
 for i in range(zero_pad):
     palette.append(0)
 
-IMG_CROP_SIZE_SEMSEG = (1024, 512)
-RESIZE_SHAPE = {'gta5': (1126, 619), 'synthia':(1113, 661), 'cityscapes':(1024,512)}
-DATASETS_IMG_SIZE = {'gta5': (1914, 1052), 'synthia':(1280, 760), 'cityscapes':(2048,1024)}
+IMG_CROP_SIZE_SEMSEG = (512, 512)
+RESIZE_SHAPE = {'real':(512,512), 'synth':(512,512)}
+DATASETS_IMG_SIZE = {'real':(13519,6202), 'synth':(2048,2048)}
 BEST_MIOU = 0.
 
-
+PALETTE = {
+    (0, 0, 0): 0,
+    (1, 0, 0): 1,
+    (0, 1, 0): 2,
+    (0, 0, 1): 3,
+    (1, 1, 0): 1,
+    (1, 0, 1): 1,
+    (1, 1, 1): 1,
+    (0, 1, 1): 3
+}
 
 
 # Cityscapes labels
@@ -74,7 +81,7 @@ Label = namedtuple( 'Label' , [
 
 labels = [
     #       name                     id    trainId   category            catId     hasInstances   ignoreInEval   color
-    Label(  'unlabeled'            ,  0 ,      0 , 'void'               , 0       , False        , True         , (  0,  0,  0) ),
+    Label(  'unlabeled'            ,  0 ,      0 , 'void'             , 0       , False        , True         , (  0,  0,  0) ),
     Label(  'manhole'              ,  1 ,      1 , 'utility'            , 1       , False        , False        , (  255,  0,  0) ),
     Label(  'trench'               ,  2 ,      2 , 'utility'            , 1       , False        , False        , (  0,  255,  0) ),
     Label(  'pipe'                 ,  3 ,      3 , 'utility'            , 1       , False        , False        , (  0,  0,  255) ),
@@ -102,4 +109,5 @@ for label in labels:
         category2labels[category].append(label)
     else:
         category2labels[category] = [label]
-print(category2labels)
+print('category2labels', category2labels)
+print('trainId2label', trainId2label)
