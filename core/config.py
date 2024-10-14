@@ -11,15 +11,15 @@ def get_arguments():
     # load, input, save configurations:
     parser.add_argument("--gpus", type=int, nargs='+', help="String that contains available GPUs to use", default=[0])
     parser.add_argument('--manual_seed', default=1337, type=int, help='manual seed')
-    parser.add_argument('--continue_train_from_path', default= '/user_volume_david_delange/ProCST/TrainedModels/04-10-2024::00:20:46GPU0/1',type=str, help='Path to folder that contains all networks and continues to train from there')
-    parser.add_argument('--resume_to_epoch', default=5, type=int, help='Resumes training from specified epoch')
+    parser.add_argument('--continue_train_from_path', default= '/user_volume_david_delange/ProCST/TrainedModels/06-10-2024::12:56:30GPU0/2',type=str, help='Path to folder that contains all networks and continues to train from there')
+    parser.add_argument('--resume_to_epoch', default=12, type=int, help='Resumes training from specified epoch')
     parser.add_argument('--resume_step', default=1, type=int, help='Resumes Semseg training to specified step')
     parser.add_argument('--nc_im', type=int, help='image # channels', default=3)
     parser.add_argument('--no_drop_last', default=True, action='store_false', help='When this flag turns on, last batch is not dropped. Regular behavour: drops last batch in training mode.')
 
     #SiT dataset configurations:
-    parser.add_argument("--sit_output_path", type=str, default=None, help="Path to output SiT generated dataset")
-    parser.add_argument("--trained_procst_path", type=str, default=None, help="Path to pretrained ProCST model.")
+    parser.add_argument("--sit_output_path", type=str, default='/user_volume_david_delange/data/procst/sit', help="Path to output SiT generated dataset")
+    parser.add_argument("--trained_procst_path", type=str, default='/user_volume_david_delange/ProCST/TrainedModels/07-10-2024::19:33:02GPU0/Gst.pth', help="Path to pretrained ProCST model.")
     parser.add_argument('--skip_created_files', default=False, action='store_true', help='Skip already created files in the output directory.')
 
     # Dataset parameters:
@@ -27,7 +27,7 @@ def get_arguments():
     parser.add_argument("--target", type=str, default='real', help='target dataset. real')
     parser.add_argument("--src_data_dir", type=str, default='/user_volume_david_delange/data/procst/synth', help='Path to the directory containing the source dataset.')
     parser.add_argument("--trg_data_dir", type=str, default='/user_volume_david_delange/data/procst/real', help='Path to the directory containing the target dataset.')
-    parser.add_argument("--num_workers", type=int, default=6, help="Number of threads for each worker")
+    parser.add_argument("--num_workers", type=int, default=18, help="Number of threads for each worker")
 
     # generator parameters:
     parser.add_argument('--batch_size', type=int, default=1)

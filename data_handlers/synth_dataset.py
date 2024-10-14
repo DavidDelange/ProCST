@@ -12,10 +12,11 @@ from core.transforms_torch import CustomGaussianBlur,RandomCropInsideBoundingBox
 from torchvision.transforms import InterpolationMode
 
 class SynthDataSet(domainAdaptationDataSet):
-    def __init__(self, root, images_list_path, scale_factor, num_scales, curr_scale, set, get_image_label=False, get_image_label_pyramid=False, get_filename=False, get_original_image=False):
+    def __init__(self, root, images_list_path, scale_factor, num_scales, curr_scale, set, get_image_label=False, get_image_label_pyramid=False, get_filename=False, get_original_image=False, get_sit_image=False):
         super(SynthDataSet, self).__init__(root, images_list_path, scale_factor, num_scales, curr_scale, set, get_image_label=get_image_label)
         self.domain_resize = RESIZE_SHAPE['synth']
         self.get_image_label_pyramid = get_image_label_pyramid
+        self.get_sit_image = get_sit_image
         self.get_filename = get_filename
         self.get_original_image = get_original_image
         self.id_to_trainid = {0: 0, 1: 1, 2: 2, 3: 3}
@@ -47,10 +48,12 @@ class SynthDataSet(domainAdaptationDataSet):
             label = None
 
         scales_pyramid = self.GeneratePyramid(image)
-        if self.get_image_label:
+        if self.get_image_label and not self.get_sit_image:
             return scales_pyramid, label
         elif self.get_image_label_pyramid:
             return scales_pyramid, labels_pyramid
+        elif self.get_sit_image:
+            return scales_pyramid, self.img_ids[index], label, background
         else:
             return scales_pyramid if not self.get_filename else scales_pyramid, self.img_ids[index]
 

@@ -16,7 +16,21 @@ def generate_data_list(root_path, dataset, set_name):
 
     print(f"Data list for subset '{set_name}' generated successfully.")
 
+def generate_data_list_daformer(root_path, dataset, set_name):
+    # Define the dataset directory
+    dataset_dir = f"/user_volume_david_delange/ProCST/dataset/{dataset}"
+    os.makedirs(dataset_dir, exist_ok=True)  # Ensure the full directory is created
 
+    # Define the output file
+    output_file = f"{dataset_dir}/{set_name}.txt"
+
+    # Open the output file and write file names
+    with open(output_file, "w") as file:
+        for root, dirs, files in os.walk(f"{root_path}/samples"):
+            for filename in files:
+                file.write(filename + "\n")    
+
+    print(f"Data list for subset '{set_name}' generated successfully.")
 #Crea una funcion que lea el archivo .txt dada una ruta y cree a partir de ella dos nuevas: una con el 80% de los datos y otra con el 20% restante que se llame train_semseg_net.txt y val_semseg_net.txt respectivamente
 def split_data_file(path, set_name):
     # Leer el archivo original
@@ -36,5 +50,7 @@ def split_data_file(path, set_name):
 
 if __name__ == "__main__":
     #generate_data_list('/user_volume_david_delange/data/procst', 'real', "val")
-    #generate_data_list('/user_volume_david_delange/data/procst', 'synth', "train")
-    split_data_file("/user_volume_david_delange/ProCST/dataset/synth", 'train.txt')
+    #generate_data_list('/user_volume_david_delange/data/procst', 'synth_daformer', "train")
+    #split_data_file("/user_volume_david_delange/ProCST/dataset/synth", 'train.txt')ç
+    
+    generate_data_list_daformer('/raw_synth_gsx_008/raw-synth-gsx-008/train', 'synth_daformer', "train")

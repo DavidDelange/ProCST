@@ -3,8 +3,8 @@ from data_handlers.synth_dataset import SynthDataSet
 from data_handlers.real_dataset import RealDataSet
 from data_handlers.domain_adaptation_dataset import domainAdaptationDataSet
 
-def CreateSrcDataLoader(opt, set='train', get_image_label=False, get_image_label_pyramid=False, get_filename=False, get_original_image=False):
-    if opt.source == 'synth':
+def CreateSrcDataLoader(opt, set='train', get_image_label=False, get_image_label_pyramid=False, get_filename=False, get_original_image=False, get_sit_image=False):
+    if opt.source == 'synth' or opt.source == 'synth_daformer':
         source_dataset = SynthDataSet(opt.src_data_dir,
                                      opt.src_data_list,
                                      opt.scale_factor,
@@ -14,7 +14,8 @@ def CreateSrcDataLoader(opt, set='train', get_image_label=False, get_image_label
                                      get_image_label=get_image_label,
                                      get_image_label_pyramid=get_image_label_pyramid,
                                      get_filename=get_filename,
-                                     get_original_image=get_original_image)
+                                     get_original_image=get_original_image,
+                                     get_sit_image=get_sit_image)
     else:
         raise ValueError('The source dataset mush be synth')
 

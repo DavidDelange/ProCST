@@ -22,19 +22,21 @@ class RealDataSet(domainAdaptationDataSet):
         if images_list_path != None:
             self.images_list_file = osp.join(images_list_path, '%s.txt' % set)
             self.img_ids = [image_id.strip().split('.')[0] for image_id in open(self.images_list_file)]
-
+            
     def __len__(self):
         return len(self.img_ids)
 
     def __getitem__(self, index):
+        scales_pyramid, label, label_copy = None, None, None
         image, label, background = self.getitem_seescans(index)
-        
         if image.mode != 'RGB':
             image = image.convert('RGB')
 
-        scales_pyramid, label, label_copy = None, None, None
+        
         if self.get_image_label:
-            assert image.size == label.size
+            h_img, w_img = image.size
+            h_label, w_label = label.size()[-2:]
+            assert (h_img, w_img) == (h_label, w_label)
             label_copy = self.mask_label_copy(self.convert_to_class_ids(label), background)
 
         scales_pyramid = None
@@ -79,31 +81,28 @@ class RealDataSet(domainAdaptationDataSet):
         # Shape is [num_channels_sample + num_channels_target, H, W]
         composition = np.concatenate((sample, target, background), axis=2)
 
-        # Apply transforms if set
-        if self.get_original_image:
-            pass
-        else:
-            transforms_pipeline = Compose(
-            [
-                ToTensor(),
-                # CustomRandomContrast(alpha_range=[0.5, 1.5], p=0.3, num_labels=3),
-                # RandomRotation(degrees=10, expand=False),
-                RandomHorizontalFlip(p=0.5),
-                RandomVerticalFlip(p=0.5),
-                RandomCropInsideBoundingBox(image_dist_meters=sample_length, target_crop_meters=10, min_percentage=0.3, p=1, stage='train', verbose=False),
-                Resize(size=(512, 512), interpolation=InterpolationMode.NEAREST),
-                # CustomGaussianBlur(kernel_size_range=[5, 9], sigma_range=[0.5, 2], p=0.3, num_labels=3),
-                BinarizeTargets(self.num_labels + 1)
-            ])            
-            transformed_composition = transforms_pipeline(composition)
+        
+        transforms_pipeline = Compose(
+        [
+            ToTensor(),
+            # CustomRandomContrast(alpha_range=[0.5, 1.5], p=0.3, num_labels=3),
+            # RandomRotation(degrees=10, expand=False),
+            RandomHorizontalFlip(p=0.5),
+            RandomVerticalFlip(p=0.5),
+            RandomCropInsideBoundingBox(image_dist_meters=sample_length, target_crop_meters=10, min_percentage=0.3, p=1, stage='train', verbose=False),
+            Resize(size=(512, 512), interpolation=InterpolationMode.NEAREST),
+            # CustomGaussianBlur(kernel_size_range=[5, 9], sigma_range=[0.5, 2], p=0.3, num_labels=3),
+            BinarizeTargets(self.num_labels + 1)
+        ])            
+        transformed_composition = transforms_pipeline(composition)
 
-            # Return sample and target tuple
-            # First sample_channels channels correspond to sample, rest correspond to target
-            sample = transformed_composition[:sample_channels]
-            target = transformed_composition[sample_channels:target_channels+sample_channels]
-            background = transformed_composition[target_channels+sample_channels:]
+        # Return sample and target tuple
+        # First sample_channels channels correspond to sample, rest correspond to target
+        sample = transformed_composition[:sample_channels]
+        target = transformed_composition[sample_channels:target_channels+sample_channels]
+        background = transformed_composition[target_channels+sample_channels:]
 
-            sample = F.to_pil_image(sample.cpu())
+        sample = F.to_pil_image(sample.cpu())
         return sample, target, background
             
     def get_sample(self, index):
@@ -219,11 +218,11 @@ if __name__ == '__main__':
     scale_factor = 0.5
     num_scales = 2
     curr_scale = 1
-    set = 'train'
-    get_scales_pyramid=False,
-    get_image_label = False
-    get_original_image = False
+    set = 'val'
+    get_scales_pyramid=False
+    get_image_label = True
+    get_original_image = True
     real_dataset = RealDataSet(root, images_list_path, scale_factor, num_scales, curr_scale, set, get_image_label, get_scales_pyramid, get_original_image)
-    print(real_dataset[0])
+    print(real_dataset[106])
     print(len(real_dataset))
-    
+        
